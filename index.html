@@ -83,62 +83,78 @@ textarea::placeholder{color:#c7c7cc;}
 .part-block .out-head{background:rgba(0,122,255,0.03);}
 .lbl-note{font-size:12px;color:#aeaeb2;font-weight:400;letter-spacing:0;text-transform:none;margin-left:4px;}
 
-@media(prefers-color-scheme:dark){
-body{background:#1c1c1e;color:#fff;}
-.btn-danger{background:#ff453a;}
-.dirty-bar{color:#ffa040;}
-.topbar{background:rgba(28,28,30,0.96);border-color:rgba(255,255,255,0.1);}
-.title{color:#fff;}
-.sub{color:#98989e;}
-.tab-seg{background:rgba(118,118,128,0.24);}
-.tsb{color:#98989e;}
-.tsb.on{background:#3a3a3c;color:#fff;}
-.lbl{color:#98989e;}
-.card{background:#2c2c2e;}
-.row{border-color:rgba(255,255,255,0.08);}
-.rtitle{color:#fff;}
-.rsub{color:#98989e;}
-.num-in{color:#fff !important;background:rgba(0,122,255,0.22) !important;border-color:rgba(0,122,255,0.45) !important;}
-.num-in:focus{border-color:#0a84ff !important;box-shadow:0 0 0 3px rgba(10,132,255,0.25) !important;}
-textarea{color:#fff;}
-textarea::placeholder{color:#48484a;}
-.out-head{border-color:rgba(255,255,255,0.08);}
-.out-title{color:#98989e;}
-.copy-btn{color:#0a84ff;}
-.bdg-b{background:rgba(10,132,255,0.18);color:#0a84ff;}
-.bdg-g{background:rgba(52,199,89,0.18);color:#30d158;}
-.bdg-p{background:rgba(191,90,242,0.18);color:#bf5af2;}
-.bdg-o{background:rgba(255,159,10,0.18);color:#ffa040;}
-.tog{background:#3a3a3c;}
-.sec-note{background:rgba(191,90,242,0.14);}
-.sec-note p{color:#bf5af2;}
-.ex-box{background:rgba(191,90,242,0.14);}
-.ex-row{color:#98989e;}
-.ex-val{color:#fff;}
-.step-label{color:#98989e;}
-.step-val{color:#0a84ff;}
-.sublabel{color:#636366;}
-.sbtn{background:rgba(10,132,255,0.18);color:#0a84ff;}
-.btn-blue{background:#0a84ff;}
-.s-pct-in,.s-flat-in{color:#bf5af2 !important;background:rgba(191,90,242,0.14) !important;border-color:rgba(191,90,242,0.35) !important;}
-.range-in{color:#fff !important;background:rgba(255,255,255,0.08) !important;border-color:rgba(255,255,255,0.15) !important;}
-.range-in:focus{border-color:#0a84ff !important;box-shadow:0 0 0 2px rgba(10,132,255,0.2) !important;}
-.del-btn{background:rgba(255,69,58,0.18) !important;color:#ff453a !important;}
-.markup-lbl{color:#636366;}
-.add-tier-btn{border-color:rgba(10,132,255,0.4) !important;background:rgba(10,132,255,0.08) !important;color:#0a84ff !important;}
-.btn-danger{background:#ff453a;}
-.dirty-bar{color:#ffa040;}
-.part-block .out-head{background:rgba(10,132,255,0.05);}
-.lbl-note{color:#636366;}
-}
+/* Кнопка очистить */
+.inp-wrap{position:relative;}
+.clear-btn{position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.1);border:none;color:#6e6e73;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity .15s;}
+.clear-btn:active{transform:scale(.88);}
+
+/* Анимация результата */
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.result-anim{animation:fadeIn .35s ease;}
+
+/* Кнопка темы в шапке */
+.topbar-inner{position:relative;}
+.theme-btn{position:absolute;top:50%;right:0;transform:translateY(-50%);background:none;border:none;font-size:19px;cursor:pointer;padding:4px;line-height:1;opacity:.75;}
+.theme-btn:active{opacity:1;transform:translateY(-50%) scale(.9);}
+
+/* Тёмный режим */
+body.dark{background:#1c1c1e;color:#fff;}
+body.dark .btn-danger{background:#ff453a;}
+body.dark .dirty-bar{color:#ffa040;}
+body.dark .topbar{background:rgba(28,28,30,0.96);border-color:rgba(255,255,255,0.1);}
+body.dark .title{color:#fff;}
+body.dark .sub{color:#98989e;}
+body.dark .tab-seg{background:rgba(118,118,128,0.24);}
+body.dark .tsb{color:#98989e;}
+body.dark .tsb.on{background:#3a3a3c;color:#fff;}
+body.dark .lbl{color:#98989e;}
+body.dark .card{background:#2c2c2e;}
+body.dark .row{border-color:rgba(255,255,255,0.08);}
+body.dark .rtitle{color:#fff;}
+body.dark .rsub{color:#98989e;}
+body.dark .num-in{color:#fff !important;background:rgba(0,122,255,0.22) !important;border-color:rgba(0,122,255,0.45) !important;}
+body.dark .num-in:focus{border-color:#0a84ff !important;box-shadow:0 0 0 3px rgba(10,132,255,0.25) !important;}
+body.dark textarea{color:#fff;}
+body.dark textarea::placeholder{color:#48484a;}
+body.dark .out-head{border-color:rgba(255,255,255,0.08);}
+body.dark .out-title{color:#98989e;}
+body.dark .copy-btn{color:#0a84ff;}
+body.dark .bdg-b{background:rgba(10,132,255,0.18);color:#0a84ff;}
+body.dark .bdg-g{background:rgba(52,199,89,0.18);color:#30d158;}
+body.dark .bdg-p{background:rgba(191,90,242,0.18);color:#bf5af2;}
+body.dark .bdg-o{background:rgba(255,159,10,0.18);color:#ffa040;}
+body.dark .tog{background:#3a3a3c;}
+body.dark .sec-note{background:rgba(191,90,242,0.14);}
+body.dark .sec-note p{color:#bf5af2;}
+body.dark .ex-box{background:rgba(191,90,242,0.14);}
+body.dark .ex-row{color:#98989e;}
+body.dark .ex-val{color:#fff;}
+body.dark .step-label{color:#98989e;}
+body.dark .step-val{color:#0a84ff;}
+body.dark .sublabel{color:#636366;}
+body.dark .sbtn{background:rgba(10,132,255,0.18);color:#0a84ff;}
+body.dark .btn-blue{background:#0a84ff;}
+body.dark .s-pct-in,body.dark .s-flat-in{color:#bf5af2 !important;background:rgba(191,90,242,0.14) !important;border-color:rgba(191,90,242,0.35) !important;}
+body.dark .range-in{color:#fff !important;background:rgba(255,255,255,0.08) !important;border-color:rgba(255,255,255,0.15) !important;}
+body.dark .range-in:focus{border-color:#0a84ff !important;box-shadow:0 0 0 2px rgba(10,132,255,0.2) !important;}
+body.dark .del-btn{background:rgba(255,69,58,0.18) !important;color:#ff453a !important;}
+body.dark .markup-lbl{color:#636366;}
+body.dark .add-tier-btn{border-color:rgba(10,132,255,0.4) !important;background:rgba(10,132,255,0.08) !important;color:#0a84ff !important;}
+body.dark .part-block .out-head{background:rgba(10,132,255,0.05);}
+body.dark .lbl-note{color:#636366;}
+body.dark .clear-btn{background:rgba(255,255,255,0.12);color:#98989e;}
 </style>
 
 </head>
 <body>
+<script>(function(){var t;try{t=localStorage.getItem('theme');}catch(e){}if(t==='dark'||(t===null&&window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.body.classList.add('dark');}})();</script>
 <div class="wrap">
   <div class="topbar">
-    <div class="title">Мобилочка 💎</div>
-    <div class="sub">Конвертер прайс-листа</div>
+    <div class="topbar-inner">
+      <div class="title">Мобилочка 💎</div>
+      <div class="sub">Конвертер прайс-листа</div>
+      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" aria-label="Переключить тему">🌙</button>
+    </div>
     <div class="tab-seg">
       <button class="tsb on" id="tb0" onclick="goTab(0)">Прайс</button>
       <button class="tsb" id="tb1" onclick="goTab(1)">Наценки</button>
@@ -153,7 +169,10 @@ textarea::placeholder{color:#48484a;}
       <div class="lbl">Прайс от поставщика</div>
       <div class="card">
         <div class="ta-wrap">
-          <textarea id="inp" rows="9" placeholder="Вставьте прайс от Мобилочки сюда..."></textarea>
+          <div class="inp-wrap">
+            <textarea id="inp" rows="9" placeholder="Вставьте прайс от Мобилочки сюда..." oninput="onInpChange()"></textarea>
+            <button class="clear-btn" id="clear-btn" onclick="clearInp()" style="display:none;" aria-label="Очистить">✕</button>
+          </div>
         </div>
       </div>
     </div>
@@ -247,6 +266,15 @@ textarea::placeholder{color:#48484a;}
 
   <!-- TAB 3: Настройки -->
   <div class="page" id="pg3">
+    <div class="sec" style="margin-top:8px;">
+      <div class="lbl">Оформление</div>
+      <div class="card">
+        <div class="row">
+          <div class="rtext"><div class="rtitle">Тёмная тема</div><div class="rsub">Ручное управление</div></div>
+          <input type="checkbox" class="tog" id="tog-dark" onchange="toggleTheme(this.checked)">
+        </div>
+      </div>
+    </div>
     <div class="sec">
       <div class="lbl">Шапка прайса <span class="lbl-note">используйте {DATE} для даты</span></div>
       <div class="card">
@@ -611,7 +639,11 @@ function doConvert(secret){
   // Разбиваем на части
   var parts=splitIntoParts(fullText);
 
-  document.getElementById('out-sec').style.display='block';
+  var outSec=document.getElementById('out-sec');
+  outSec.style.display='block';
+  outSec.classList.remove('result-anim');
+  void outSec.offsetWidth;
+  outSec.classList.add('result-anim');
   renderParts(parts,cnt,totalAdd,secret);
   showToast('✓ Готово — '+cnt+' позиций'+(parts.length>1?', '+parts.length+' части':''));
 }
@@ -621,10 +653,37 @@ function showToast(msg){
   setTimeout(function(){t.classList.remove('show');},2000);
 }
 
+/* ─── Очистить поле ввода ───────────────────────────────── */
+function onInpChange(){
+  document.getElementById('clear-btn').style.display=document.getElementById('inp').value?'flex':'none';
+}
+function clearInp(){
+  document.getElementById('inp').value='';
+  document.getElementById('clear-btn').style.display='none';
+}
+
+/* ─── Тёмная тема ───────────────────────────────────────── */
+function toggleTheme(forceDark){
+  var isDark=forceDark!==undefined?forceDark:!document.body.classList.contains('dark');
+  if(isDark){document.body.classList.add('dark');}else{document.body.classList.remove('dark');}
+  var btn=document.getElementById('theme-btn');
+  if(btn)btn.textContent=isDark?'☀️':'🌙';
+  var tog=document.getElementById('tog-dark');
+  if(tog)tog.checked=isDark;
+  try{localStorage.setItem('theme',isDark?'dark':'light');}catch(e){}
+}
+function initTheme(){
+  var saved=null;
+  try{saved=localStorage.getItem('theme');}catch(e){}
+  var isDark=saved==='dark'||(saved===null&&window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches);
+  toggleTheme(isDark);
+}
+
 // Инициализация
 loadAll();
 buildTiers();
 updEx();
+initTheme();
 </script>
 
 </body>
