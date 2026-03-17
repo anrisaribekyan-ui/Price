@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Мобилочка 💎</title>
+<style>
+html,body{width:100%;height:100%;-webkit-text-size-adjust:100%;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;background:#f2f2f7;color:#1c1c1e;font-size:16px;}
+.wrap{width:100%;padding-bottom:env(safe-area-inset-bottom,20px);}
+.topbar{background:rgba(242,242,247,0.96);padding:16px 16px 10px;padding-top:calc(16px + env(safe-area-inset-top,0px));position:sticky;top:0;z-index:50;border-bottom:0.5px solid rgba(0,0,0,0.1);}
+.title{font-size:18px;font-weight:700;text-align:center;}
+.sub{font-size:13px;color:#6e6e73;text-align:center;margin-top:3px;}
+.tab-seg{display:flex;background:rgba(118,118,128,0.12);border-radius:10px;padding:2px;margin:12px 0 0;}
+.tsb{flex:1;padding:8px 2px;font-size:14px;font-weight:500;text-align:center;border-radius:8px;cursor:pointer;color:#6e6e73;border:none;background:transparent;transition:all .2s;}
+.tsb.on{background:#fff;color:#1c1c1e;box-shadow:0 1px 6px rgba(0,0,0,0.12);}
+.sec{padding:16px 16px 0;}
+.lbl{font-size:13px;font-weight:600;color:#6e6e73;text-transform:uppercase;letter-spacing:.5px;padding:0 4px;margin-bottom:8px;}
+.card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.07);}
+.row{display:flex;align-items:center;padding:13px 16px;gap:10px;border-bottom:0.5px solid rgba(0,0,0,0.08);}
+.row:last-child{border-bottom:none;}
+.rtext{flex:1;}
+.rtitle{font-size:16px;color:#1c1c1e;}
+.rsub{font-size:13px;color:#6e6e73;margin-top:2px;}
+.num-in{width:86px;text-align:right;font-size:16px;font-weight:600;color:#007aff;background:rgba(0,122,255,0.08);border:1px solid rgba(0,122,255,0.25);border-radius:8px;padding:6px 9px;outline:none;}
+.num-in:focus{border-color:#007aff;box-shadow:0 0 0 3px rgba(0,122,255,0.15);}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
+.sbtn{min-width:36px;height:36px;border-radius:50%;background:rgba(0,122,255,0.1);border:none;color:#007aff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sbtn:active{transform:scale(.88);}
+.ta-wrap{padding:14px 16px;}
+textarea{width:100%;border:none;outline:none;background:transparent;font-size:15px;font-family:inherit;resize:none;line-height:1.6;color:#1c1c1e;}
+textarea::placeholder{color:#c7c7cc;}
+.btn{width:100%;padding:16px;border:none;border-radius:14px;font-size:17px;font-weight:700;cursor:pointer;transition:transform .15s,opacity .15s;}
+.btn:active{transform:scale(.97);opacity:.88;}
+.btn-blue{background:#007aff;color:#fff;box-shadow:0 4px 14px rgba(0,122,255,0.35);}
+.btn-purple{background:linear-gradient(135deg,#af52de,#007aff);color:#fff;box-shadow:0 4px 14px rgba(175,82,222,0.35);margin-top:12px;}
+.out-head{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:0.5px solid rgba(0,0,0,0.08);}
+.out-title{font-size:14px;color:#6e6e73;font-weight:500;}
+.copy-btn{font-size:15px;font-weight:600;color:#007aff;background:none;border:none;cursor:pointer;padding:4px 0;}
+.badges{display:flex;gap:6px;flex-wrap:wrap;padding:10px 16px 0;}
+.bdg{font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px;}
+.bdg-b{background:rgba(0,122,255,0.1);color:#007aff;}
+.bdg-g{background:rgba(52,199,89,0.1);color:#34c759;}
+.bdg-p{background:rgba(175,82,222,0.1);color:#af52de;}
+.tog{appearance:none;-webkit-appearance:none;width:51px;height:31px;border-radius:16px;background:#e5e5ea;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;}
+.tog:checked{background:#34c759;}
+.tog::after{content:'';position:absolute;width:27px;height:27px;border-radius:50%;background:#fff;top:2px;left:2px;transition:transform .2s;box-shadow:0 2px 6px rgba(0,0,0,0.2);}
+.tog:checked::after{transform:translateX(20px);}
+.toast{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%) translateY(80px);background:rgba(40,40,40,0.94);color:#fff;padding:12px 22px;border-radius:22px;font-size:15px;font-weight:600;transition:transform .25s;z-index:200;white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.page{display:none;}
+.page.on{display:block;}
+.sec-note{background:rgba(175,82,222,0.07);border-radius:14px;padding:14px 16px;margin:0 4px;}
+.sec-note p{font-size:14px;color:#af52de;line-height:1.6;}
+.ex-box{background:rgba(175,82,222,0.07);border-radius:12px;padding:12px 14px;margin:10px 16px;}
+.ex-row{font-size:14px;color:#6e6e73;line-height:2;}
+.ex-val{color:#1c1c1e;font-weight:600;}
+.ex-total{font-size:16px;font-weight:700;color:#34c759;margin-top:6px;}
+.step-row{padding:14px 16px;}
+.step-label{font-size:14px;color:#6e6e73;margin-bottom:10px;}
+.step-ctrl{display:flex;align-items:center;gap:12px;}
+.step-val{flex:1;text-align:center;font-size:20px;font-weight:700;color:#007aff;}
+.sublabel{font-size:12px;color:#aeaeb2;text-align:center;margin-top:3px;}
+
+@media(prefers-color-scheme:dark){
+body{background:#1c1c1e;color:#fff;}
+.topbar{background:rgba(28,28,30,0.96);border-color:rgba(255,255,255,0.1);}
+.title{color:#fff;}
+.sub{color:#98989e;}
+.tab-seg{background:rgba(118,118,128,0.24);}
+.tsb{color:#98989e;}
+.tsb.on{background:#3a3a3c;color:#fff;}
+.lbl{color:#98989e;}
+.card{background:#2c2c2e;}
+.row{border-color:rgba(255,255,255,0.08);}
+.rtitle{color:#fff;}
+.rsub{color:#98989e;}
+.num-in{color:#fff !important;background:rgba(0,122,255,0.22) !important;border-color:rgba(0,122,255,0.45) !important;}
+.num-in:focus{border-color:#0a84ff !important;box-shadow:0 0 0 3px rgba(10,132,255,0.25) !important;}
+textarea{color:#fff;}
+textarea::placeholder{color:#48484a;}
+.out-head{border-color:rgba(255,255,255,0.08);}
+.out-title{color:#98989e;}
+.copy-btn{color:#0a84ff;}
+.bdg-b{background:rgba(10,132,255,0.18);color:#0a84ff;}
+.bdg-g{background:rgba(52,199,89,0.18);color:#30d158;}
+.bdg-p{background:rgba(191,90,242,0.18);color:#bf5af2;}
+.tog{background:#3a3a3c;}
+.sec-note{background:rgba(191,90,242,0.14);}
+.sec-note p{color:#bf5af2;}
+.ex-box{background:rgba(191,90,242,0.14);}
+.ex-row{color:#98989e;}
+.ex-val{color:#fff;}
+.step-label{color:#98989e;}
+.step-val{color:#0a84ff;}
+.sublabel{color:#636366;}
+.sbtn{background:rgba(10,132,255,0.18);color:#0a84ff;}
+.btn-blue{background:#0a84ff;}
+.s-pct-in,.s-flat-in{color:#bf5af2 !important;background:rgba(191,90,242,0.14) !important;border-color:rgba(191,90,242,0.35) !important;}
+}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="title">Мобилочка 💎</div>
+    <div class="sub">Конвертер прайс-листа</div>
+    <div class="tab-seg">
+      <button class="tsb on" id="tb0" onclick="goTab(0)">Конвертер</button>
+      <button class="tsb" id="tb1" onclick="goTab(1)">Наценки</button>
+      <button class="tsb" id="tb2" onclick="goTab(2)">Для парней</button>
+    </div>
+  </div>
+
+  <div class="page on" id="pg0">
+    <div class="sec">
+      <div class="lbl">Прайс от поставщика</div>
+      <div class="card">
+        <div class="ta-wrap">
+          <textarea id="inp" rows="9" placeholder="Вставьте прайс от Мобилочки сюда..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="sec">
+      <button class="btn btn-blue" onclick="doConvert(false)">✦ Сконвертировать</button>
+      <button class="btn btn-purple" onclick="doConvert(true)">✦ Для парней</button>
+    </div>
+    <div class="sec" id="out-sec" style="display:none;margin-top:0;">
+      <div class="card" style="margin-top:16px;">
+        <div class="out-head">
+          <span class="out-title">Готовый прайс</span>
+          <button class="copy-btn" onclick="doCopy()">Скопировать</button>
+        </div>
+        <div class="badges" id="bdgs"></div>
+        <div class="ta-wrap">
+          <textarea id="out" rows="12" readonly></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="pg1">
+    <div class="sec">
+      <div class="lbl">Наценки по диапазону</div>
+      <div class="card" id="tiers-card"></div>
+    </div>
+    <div class="sec">
+      <div class="lbl">Шаг кнопок ±</div>
+      <div class="card">
+        <div class="step-row">
+          <div class="step-label">Шаг изменения наценки (₽)</div>
+          <div class="step-ctrl">
+            <button class="sbtn" onclick="chStep(-500)">−</button>
+            <div>
+              <div class="step-val" id="step-disp">500</div>
+              <div class="sublabel">100 — 5 000</div>
+            </div>
+            <button class="sbtn" onclick="chStep(500)">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="lbl">Параметры</div>
+      <div class="card">
+        <div class="row">
+          <div class="rtext"><div class="rtitle">Округлять до 00</div><div class="rsub">54 320 → 54 300</div></div>
+          <input type="checkbox" class="tog" id="tog-round" checked>
+        </div>
+      </div>
+    </div>
+    <div class="sec">
+      <button class="btn btn-blue" onclick="saveAll()">Сохранить настройки</button>
+    </div>
+  </div>
+
+  <div class="page" id="pg2">
+    <div class="sec">
+      <div class="sec-note">
+        <p>Конвертируется по обычным наценкам + скрытая надбавка. Клиент видит только итоговую цену.</p>
+      </div>
+    </div>
+    <div class="sec" style="margin-top:12px;">
+      <div class="lbl">Скрытая надбавка</div>
+      <div class="card">
+        <div class="row">
+          <div class="rtext"><div class="rtitle">Скрытый процент</div><div class="rsub">% сверх обычной наценки</div></div>
+          <input class="num-in s-pct-in" id="s-pct" type="number" value="0" onchange="updEx()">
+          <span style="font-size:15px;color:#6e6e73;">%</span>
+        </div>
+        <div class="row">
+          <div class="rtext"><div class="rtitle">Фиксированная сумма</div><div class="rsub">К каждой позиции</div></div>
+          <input class="num-in s-flat-in" id="s-flat" type="number" value="0" onchange="updEx()">
+          <span style="font-size:15px;color:#6e6e73;">₽</span>
+        </div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="lbl">Пример (50 000 ₽ от поставщика)</div>
+      <div class="card">
+        <div class="ex-box">
+          <div class="ex-row">Стандартная наценка: <span class="ex-val" id="ex-std">—</span></div>
+          <div class="ex-row" style="color:#af52de;">Скрытая надбавка: <span id="ex-sec" style="font-weight:600;">—</span></div>
+          <div class="ex-total">Итого клиенту: <span id="ex-tot">—</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="sec">
+      <button class="btn btn-purple" onclick="saveAll()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">✓ Готово</div>
+
+<script>
+var tiers=[
+  {label:'0 — 4 990 ₽',min:0,max:4990,key:'m1',def:1500},
+  {label:'5 000 — 18 999 ₽',min:5000,max:18999,key:'m2',def:2500},
+  {label:'19 000 — 38 999 ₽',min:19000,max:38999,key:'m3',def:3000},
+  {label:'39 000 — 79 999 ₽',min:39000,max:79999,key:'m4',def:4000},
+  {label:'80 000 — 99 999 ₽',min:80000,max:99999,key:'m5',def:4500},
+  {label:'100 000 + ₽',min:100000,max:1e9,key:'m6',def:5500}
+];
+var step=500;
+
+// Сохранение через localStorage (работает в реальном браузере/файле)
+function saveAll(){
+  var s={step:step,round:document.getElementById('tog-round').checked};
+  tiers.forEach(function(t){s[t.key]=getV(t.key);});
+  s.spct=parseInt(document.getElementById('s-pct').value)||0;
+  s.sflat=parseInt(document.getElementById('s-flat').value)||0;
+  try{localStorage.setItem('mob_v1',JSON.stringify(s));}catch(e){}
+  showToast('✓ Настройки сохранены');
+  updEx();
+}
+
+function loadAll(){
+  var s={};
+  try{s=JSON.parse(localStorage.getItem('mob_v1')||'{}');}catch(e){}
+  tiers.forEach(function(t){t.v=s[t.key]!==undefined?s[t.key]:t.def;});
+  step=s.step||500;
+  document.getElementById('step-disp').textContent=step.toLocaleString('ru');
+  document.getElementById('tog-round').checked=s.round!==false;
+  document.getElementById('s-pct').value=s.spct||0;
+  document.getElementById('s-flat').value=s.sflat||0;
+}
+
+function goTab(i){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on');});
+  document.querySelectorAll('.tsb').forEach(function(b){b.classList.remove('on');});
+  document.getElementById('pg'+i).classList.add('on');
+  document.getElementById('tb'+i).classList.add('on');
+}
+
+function buildTiers(){
+  var c=document.getElementById('tiers-card');
+  var colors=['#ff9500','#34c759','#007aff','#ff3b30','#af52de','#ff6b35'];
+  var html='';
+  tiers.forEach(function(t,i){
+    html+='<div class="row">'
+      +'<div style="width:32px;height:32px;border-radius:8px;background:'+colors[i]+'22;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:700;color:'+colors[i]+'">'+(i+1)+'</div>'
+      +'<div class="rtext"><div class="rtitle" style="font-size:15px;">'+t.label+'</div></div>'
+      +'<button class="sbtn" onclick="adjTier(\''+t.key+'\',-1)">−</button>'
+      +'<input class="num-in" id="in-'+t.key+'" type="number" value="'+t.v+'" onchange="updEx()">'
+      +'<button class="sbtn" onclick="adjTier(\''+t.key+'\',1)">+</button>'
+      +'</div>';
+  });
+  c.innerHTML=html;
+}
+
+function getV(key){
+  var el=document.getElementById('in-'+key);
+  if(el)return parseInt(el.value)||0;
+  var t=tiers.find(function(x){return x.key===key;});
+  return t?t.v:0;
+}
+function getMarkup(price){
+  var t=tiers.find(function(x){return price>=x.min&&price<=x.max;});
+  return t?getV(t.key):0;
+}
+function adjTier(key,dir){
+  var el=document.getElementById('in-'+key);
+  if(!el)return;
+  el.value=Math.max(0,(parseInt(el.value)||0)+dir*step);
+  updEx();
+}
+function chStep(d){
+  step=Math.max(100,Math.min(5000,step+d));
+  document.getElementById('step-disp').textContent=step.toLocaleString('ru');
+}
+function updEx(){
+  var base=50000,std=getV('m4');
+  var pct=parseInt(document.getElementById('s-pct').value)||0;
+  var flat=parseInt(document.getElementById('s-flat').value)||0;
+  var secAmt=Math.round((base+std)*pct/100)+flat;
+  var tot=base+std+secAmt;
+  document.getElementById('ex-std').textContent=std.toLocaleString('ru')+' ₽';
+  document.getElementById('ex-sec').textContent=secAmt.toLocaleString('ru')+' ₽';
+  document.getElementById('ex-tot').textContent=tot.toLocaleString('ru')+' ₽';
+}
+
+var HP=[/мобилочка/i,/\+7\(9[0-9]{2}\)/,/гарантия\s*🇺🇸/i,/косметические дефекты/i,/на возврат брака/i,/принимаем устройства/i];
+function stripHeader(lines){
+  var start=0;
+  for(var i=0;i<lines.length;i++){if(HP.some(function(rx){return rx.test(lines[i]);}))start=i+1;}
+  while(start<lines.length&&lines[start].trim()==='')start++;
+  return lines.slice(start);
+}
+function getDateStr(){
+  var d=new Date();
+  return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear();
+}
+
+var FOOTER='*Вся техника привезённая из других стран.\nГарантия НЕ распространяется на территории РФ (с уходом Apple, вопрос гарантии стал не актуальным)❗\n❗Гарантия 3 дня от нас на проверку целостности техники и брака.\nВ случае брака, все транспортировочные пленки должны быть на месте.\n\n🚨Наличие цвета и объём памяти уточняйте по факту!\n\nВопросы по стоимости и наличию👉🏽 @SGE12 @iBlackHelper';
+
+function doConvert(secret){
+  var text=document.getElementById('inp').value.trim();
+  if(!text){showToast('⚠ Вставьте прайс');return;}
+  var doRound=document.getElementById('tog-round').checked;
+  var pct=parseInt(document.getElementById('s-pct').value)||0;
+  var flat=parseInt(document.getElementById('s-flat').value)||0;
+  var lines=stripHeader(text.split('\n'));
+  var out=[],cnt=0,totalAdd=0;
+  lines.forEach(function(line){
+    var m=line.match(/-(\d[\d\s]*)(?=\s*$)/);
+    if(m){
+      var raw=parseInt(m[1].replace(/\s+/g,''));
+      if(!isNaN(raw)&&raw>0){
+        var mu=getMarkup(raw),np=raw+mu,secAmt=0;
+        if(secret){secAmt=Math.round(np*pct/100)+flat;np+=secAmt;}
+        if(doRound)np=Math.round(np/100)*100;
+        totalAdd+=mu+secAmt;
+        out.push(line.replace(/-(\d[\d\s]*)(\s*)$/,'-'+np.toLocaleString('ru')+'$2'));
+        cnt++;return;
+      }
+    }
+    out.push(line);
+  });
+  while(out.length>0&&out[out.length-1].trim()==='')out.pop();
+  document.getElementById('out').value='В наличии🌟 «'+getDateStr()+'»\n\n'+out.join('\n')+'\n\n'+FOOTER;
+  document.getElementById('out-sec').style.display='block';
+  var avg=cnt>0?Math.round(totalAdd/cnt):0;
+  document.getElementById('bdgs').innerHTML='<span class="bdg bdg-b">'+cnt+' позиций</span><span class="bdg bdg-g">+~'+avg.toLocaleString('ru')+' ₽</span>'+(secret?'<span class="bdg bdg-p">Для парней</span>':'');
+  showToast('✓ Готово — '+cnt+' позиций');
+}
+function doCopy(){
+  var t=document.getElementById('out');t.select();
+  try{navigator.clipboard.writeText(t.value);}catch(e){try{document.execCommand('copy');}catch(e2){}}
+  showToast('✓ Скопировано');
+}
+function showToast(msg){
+  var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},2000);
+}
+
+// Инициализация
+loadAll();
+buildTiers();
+updEx();
+</script>
+
+</body>
+</html>
