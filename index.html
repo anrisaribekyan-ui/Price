@@ -162,15 +162,9 @@ textarea::placeholder{color:#48484a;}
       <button class="btn btn-purple" onclick="doConvert(true)">✦ Для парней</button>
     </div>
     <div class="sec" id="out-sec" style="display:none;margin-top:0;">
-      <div class="card" style="margin-top:16px;">
-        <div class="out-head">
-          <span class="out-title" id="out-title">Готовый прайс</span>
-          <button class="copy-btn" onclick="doCopyAll()">Копировать всё</button>
-        </div>
-        <div class="badges" id="bdgs"></div>
-        <div class="ta-wrap">
-          <textarea id="out" rows="14" readonly></textarea>
-        </div>
+      <div style="margin-top:16px;">
+        <div class="badges" id="bdgs" style="padding:0 0 10px 4px;"></div>
+        <div id="parts-container"></div>
       </div>
     </div>
   </div>
@@ -526,13 +520,23 @@ function splitIntoParts(fullText){
 /* ─── Рендер результата ──────────────────────────────────── */
 function renderParts(parts,cnt,totalAdd,isSecret){
   var total=parts.length;
-  // join('') — части уже содержат \n\n перед PAGE_PREFIX, лишний разделитель не нужен
-  var fullText=parts.join('');
-  document.getElementById('out').value=fullText;
-
-  var label=total===1?'Готовый прайс':'Готовый прайс ('+total+' части)';
-  document.getElementById('out-title').textContent=label;
-
+  var container=document.getElementById('parts-container');
+  var html='';
+  for(var i=0;i<total;i++){
+    var label=total===1?'Готовый прайс':'Часть '+(i+1)+' из '+total;
+    var rows=Math.min(22,Math.max(6,(parts[i].replace(/^\n+/,'').match(/\n/g)||[]).length+2));
+    html+='<div class="card" style="margin-bottom:12px;">'
+      +'<div class="out-head">'
+      +'<span class="out-title">'+label+'</span>'
+      +'<button class="copy-btn" onclick="copyPart('+i+')">Копировать</button>'
+      +'</div>'
+      +'<div class="ta-wrap"><textarea id="part-'+i+'" rows="'+rows+'" readonly></textarea></div>'
+      +'</div>';
+  }
+  container.innerHTML=html;
+  for(var j=0;j<total;j++){
+    document.getElementById('part-'+j).value=parts[j].replace(/^\n+/,'');
+  }
   var avg=cnt>0?Math.round(totalAdd/cnt):0;
   document.getElementById('bdgs').innerHTML=
     '<span class="bdg bdg-b">'+cnt+' позиций</span>'
@@ -541,8 +545,8 @@ function renderParts(parts,cnt,totalAdd,isSecret){
     +(isSecret?'<span class="bdg bdg-p">Для парней</span>':'');
 }
 
-function doCopyAll(){
-  var el=document.getElementById('out');
+function copyPart(i){
+  var el=document.getElementById('part-'+i);
   try{navigator.clipboard.writeText(el.value);}catch(e){el.select();try{document.execCommand('copy');}catch(e2){}}
   showToast('✓ Скопировано');
 }
