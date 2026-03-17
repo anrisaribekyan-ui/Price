@@ -700,8 +700,7 @@ function doConvert(secret){
     fullText=header+'\n\n'+body+(footer?'\n\n'+footer:'');
   }
 
-  // Разбиваем на части
-  var parts=splitIntoParts(fullText);
+  var parts=secret?[fullText]:splitIntoParts(fullText);
 
   var outSec=document.getElementById('out-sec');
   outSec.style.display='block';
