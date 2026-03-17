@@ -16,7 +16,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;ba
 .title{font-size:18px;font-weight:700;text-align:center;}
 .sub{font-size:13px;color:#6e6e73;text-align:center;margin-top:3px;}
 .tab-seg{display:flex;background:rgba(118,118,128,0.12);border-radius:10px;padding:2px;margin:12px 0 0;}
-.tsb{flex:1;padding:8px 2px;font-size:14px;font-weight:500;text-align:center;border-radius:8px;cursor:pointer;color:#6e6e73;border:none;background:transparent;transition:all .2s;}
+.tsb{flex:1;padding:8px 2px;font-size:12px;font-weight:500;text-align:center;border-radius:8px;cursor:pointer;color:#6e6e73;border:none;background:transparent;transition:all .2s;}
 .tsb.on{background:#fff;color:#1c1c1e;box-shadow:0 1px 6px rgba(0,0,0,0.12);}
 .sec{padding:16px 16px 0;}
 .lbl{font-size:13px;font-weight:600;color:#6e6e73;text-transform:uppercase;letter-spacing:.5px;padding:0 4px;margin-bottom:8px;}
@@ -43,11 +43,12 @@ textarea::placeholder{color:#c7c7cc;}
 .out-head{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:0.5px solid rgba(0,0,0,0.08);}
 .out-title{font-size:14px;color:#6e6e73;font-weight:500;}
 .copy-btn{font-size:15px;font-weight:600;color:#007aff;background:none;border:none;cursor:pointer;padding:4px 0;}
-.badges{display:flex;gap:6px;flex-wrap:wrap;padding:10px 16px 0;}
+.badges{display:flex;gap:6px;flex-wrap:wrap;padding:8px 16px 4px;}
 .bdg{font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px;}
 .bdg-b{background:rgba(0,122,255,0.1);color:#007aff;}
 .bdg-g{background:rgba(52,199,89,0.1);color:#34c759;}
 .bdg-p{background:rgba(175,82,222,0.1);color:#af52de;}
+.bdg-o{background:rgba(255,149,0,0.1);color:#ff9500;}
 .tog{appearance:none;-webkit-appearance:none;width:51px;height:31px;border-radius:16px;background:#e5e5ea;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;}
 .tog:checked{background:#34c759;}
 .tog::after{content:'';position:absolute;width:27px;height:27px;border-radius:50%;background:#fff;top:2px;left:2px;transition:transform .2s;box-shadow:0 2px 6px rgba(0,0,0,0.2);}
@@ -78,6 +79,9 @@ textarea::placeholder{color:#c7c7cc;}
 .markup-lbl{font-size:12px;color:#6e6e73;flex:1;}
 .add-tier-btn{width:100%;margin-top:8px;padding:12px;border:1.5px dashed rgba(0,122,255,0.4);border-radius:12px;background:rgba(0,122,255,0.05);color:#007aff;font-size:15px;font-weight:600;cursor:pointer;transition:opacity .15s;}
 .add-tier-btn:active{opacity:.7;}
+.part-block{margin-top:12px;}
+.part-block .out-head{background:rgba(0,122,255,0.03);}
+.lbl-note{font-size:12px;color:#aeaeb2;font-weight:400;letter-spacing:0;text-transform:none;margin-left:4px;}
 
 @media(prefers-color-scheme:dark){
 body{background:#1c1c1e;color:#fff;}
@@ -104,6 +108,7 @@ textarea::placeholder{color:#48484a;}
 .bdg-b{background:rgba(10,132,255,0.18);color:#0a84ff;}
 .bdg-g{background:rgba(52,199,89,0.18);color:#30d158;}
 .bdg-p{background:rgba(191,90,242,0.18);color:#bf5af2;}
+.bdg-o{background:rgba(255,159,10,0.18);color:#ffa040;}
 .tog{background:#3a3a3c;}
 .sec-note{background:rgba(191,90,242,0.14);}
 .sec-note p{color:#bf5af2;}
@@ -123,6 +128,8 @@ textarea::placeholder{color:#48484a;}
 .add-tier-btn{border-color:rgba(10,132,255,0.4) !important;background:rgba(10,132,255,0.08) !important;color:#0a84ff !important;}
 .btn-danger{background:#ff453a;}
 .dirty-bar{color:#ffa040;}
+.part-block .out-head{background:rgba(10,132,255,0.05);}
+.lbl-note{color:#636366;}
 }
 </style>
 
@@ -133,12 +140,14 @@ textarea::placeholder{color:#48484a;}
     <div class="title">Мобилочка 💎</div>
     <div class="sub">Конвертер прайс-листа</div>
     <div class="tab-seg">
-      <button class="tsb on" id="tb0" onclick="goTab(0)">Конвертер</button>
+      <button class="tsb on" id="tb0" onclick="goTab(0)">Прайс</button>
       <button class="tsb" id="tb1" onclick="goTab(1)">Наценки</button>
-      <button class="tsb" id="tb2" onclick="goTab(2)">Для парней</button>
+      <button class="tsb" id="tb2" onclick="goTab(2)">Парни</button>
+      <button class="tsb" id="tb3" onclick="goTab(3)">Настройки</button>
     </div>
   </div>
 
+  <!-- TAB 0: Конвертер -->
   <div class="page on" id="pg0">
     <div class="sec">
       <div class="lbl">Прайс от поставщика</div>
@@ -153,19 +162,12 @@ textarea::placeholder{color:#48484a;}
       <button class="btn btn-purple" onclick="doConvert(true)">✦ Для парней</button>
     </div>
     <div class="sec" id="out-sec" style="display:none;margin-top:0;">
-      <div class="card" style="margin-top:16px;">
-        <div class="out-head">
-          <span class="out-title">Готовый прайс</span>
-          <button class="copy-btn" onclick="doCopy()">Скопировать</button>
-        </div>
-        <div class="badges" id="bdgs"></div>
-        <div class="ta-wrap">
-          <textarea id="out" rows="12" readonly></textarea>
-        </div>
-      </div>
+      <div class="badges" id="bdgs" style="padding-top:16px;padding-left:4px;"></div>
+      <div id="parts-container"></div>
     </div>
   </div>
 
+  <!-- TAB 1: Наценки -->
   <div class="page" id="pg1">
     <div class="sec">
       <div class="lbl">Наценки по диапазону</div>
@@ -197,14 +199,6 @@ textarea::placeholder{color:#48484a;}
         </div>
       </div>
     </div>
-    <div class="sec">
-      <div class="lbl">Подпись в прайсе</div>
-      <div class="card">
-        <div class="ta-wrap">
-          <textarea id="footer-ta" rows="6" oninput="markDirty()" placeholder="Текст подписи после прайса..."></textarea>
-        </div>
-      </div>
-    </div>
     <div class="sec" style="padding-bottom:24px;">
       <div class="dirty-bar" id="dirty-bar">⚠ Есть несохранённые изменения</div>
       <button class="btn btn-blue" onclick="saveAll()">Сохранить настройки</button>
@@ -212,6 +206,7 @@ textarea::placeholder{color:#48484a;}
     </div>
   </div>
 
+  <!-- TAB 2: Для парней -->
   <div class="page" id="pg2">
     <div class="sec">
       <div class="sec-note">
@@ -247,6 +242,31 @@ textarea::placeholder{color:#48484a;}
       <button class="btn btn-purple" onclick="saveAll()">Сохранить</button>
     </div>
   </div>
+
+  <!-- TAB 3: Настройки -->
+  <div class="page" id="pg3">
+    <div class="sec">
+      <div class="lbl">Шапка прайса <span class="lbl-note">используйте {DATE} для даты</span></div>
+      <div class="card">
+        <div class="ta-wrap">
+          <textarea id="header-ta" rows="4" oninput="markDirty()" placeholder="Текст в начале прайса..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="lbl">Подвал прайса</div>
+      <div class="card">
+        <div class="ta-wrap">
+          <textarea id="footer-ta" rows="7" oninput="markDirty()" placeholder="Текст подписи после прайса..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="sec" style="padding-bottom:24px;">
+      <div class="dirty-bar" id="dirty-bar-3">⚠ Есть несохранённые изменения</div>
+      <button class="btn btn-blue" onclick="saveAll()">Сохранить настройки</button>
+      <button class="btn btn-danger" onclick="resetDefaults()">Сбросить к стандартным</button>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast">✓ Готово</div>
@@ -264,13 +284,16 @@ var tiers=DEFAULT_TIERS.map(function(t){return{min:t.min,max:t.max,v:t.v};});
 var step=500;
 
 var STORAGE_KEY='mob_v1';
+var DEFAULT_HEADER='В наличии🌟 «{DATE}»';
 var DEFAULT_FOOTER='*Вся техника привезённая из других стран.\nГарантия НЕ распространяется на территории РФ (с уходом Apple, вопрос гарантии стал не актуальным)❗\n❗Гарантия 3 дня от нас на проверку целостности техники и брака.\nВ случае брака, все транспортировочные пленки должны быть на месте.\n\n🚨Наличие цвета и объём памяти уточняйте по факту!\n\nВопросы по стоимости и наличию👉🏽 @SGE12 @iBlackHelper';
 
 function markDirty(){
   document.getElementById('dirty-bar').style.display='block';
+  document.getElementById('dirty-bar-3').style.display='block';
 }
 function clearDirty(){
   document.getElementById('dirty-bar').style.display='none';
+  document.getElementById('dirty-bar-3').style.display='none';
 }
 
 function getTiersFromDOM(){
@@ -298,6 +321,7 @@ function saveAll(){
   var s={step:step,round:document.getElementById('tog-round').checked,tiers:tiers};
   s.spct=parseInt(document.getElementById('s-pct').value,10)||0;
   s.sflat=parseInt(document.getElementById('s-flat').value,10)||0;
+  s.header=document.getElementById('header-ta').value;
   s.footer=document.getElementById('footer-ta').value;
   try{localStorage.setItem(STORAGE_KEY,JSON.stringify(s));}catch(e){showToast('⚠ Не удалось сохранить');return;}
   buildTiers();
@@ -319,6 +343,7 @@ function loadAll(){
   document.getElementById('tog-round').checked=s.round!==false;
   document.getElementById('s-pct').value=s.spct||0;
   document.getElementById('s-flat').value=s.sflat||0;
+  document.getElementById('header-ta').value=s.header!==undefined?s.header:DEFAULT_HEADER;
   document.getElementById('footer-ta').value=s.footer!==undefined?s.footer:DEFAULT_FOOTER;
 }
 
@@ -328,6 +353,7 @@ function resetDefaults(){
   step=500;
   document.getElementById('step-in').value=step;
   document.getElementById('tog-round').checked=true;
+  document.getElementById('header-ta').value=DEFAULT_HEADER;
   document.getElementById('footer-ta').value=DEFAULT_FOOTER;
   buildTiers();
   markDirty();
@@ -440,7 +466,101 @@ function getDateStr(){
   return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear();
 }
 
+/* ─── Умное разбиение ─────────────────────────────────────── */
+var PAGE_LIMIT=4096;
+var CONT_SUFFIX='\n\n⬇️ Продолжение...';
+var PAGE_PREFIX='📄 Страница {N} ⬇️\n\n';
 
+function splitIntoParts(fullText){
+  // Разбиваем на блоки по двойному переносу строки (бренд-блоки)
+  var rawBlocks=fullText.split(/\n{2,}/);
+  var blocks=[];
+  for(var i=0;i<rawBlocks.length;i++){
+    if(rawBlocks[i].trim())blocks.push(rawBlocks[i]);
+  }
+  if(!blocks.length)return[fullText];
+
+  var parts=[];        // массив частей, каждая часть — массив блоков
+  var curBlocks=[];
+  var curLen=0;
+
+  for(var b=0;b<blocks.length;b++){
+    var blk=blocks[b];
+    var sep=curBlocks.length>0?'\n\n':'';
+    var partIdx=parts.length;             // индекс текущей (формируемой) части
+    var prefix=partIdx===0?'':PAGE_PREFIX.replace('{N}',partIdx+1);
+    // пессимистично считаем суффикс продолжения
+    var tentative=prefix.length+curLen+sep.length+blk.length+CONT_SUFFIX.length;
+
+    if(curBlocks.length>0&&tentative>PAGE_LIMIT){
+      // сохраняем текущую часть, начинаем новую
+      parts.push(curBlocks.slice());
+      curBlocks=[blk];
+      curLen=blk.length;
+    }else{
+      curBlocks.push(blk);
+      curLen+=sep.length+blk.length;
+    }
+  }
+  if(curBlocks.length>0)parts.push(curBlocks);
+
+  // Собираем строки частей
+  var result=[];
+  for(var p=0;p<parts.length;p++){
+    var pre=p===0?'':PAGE_PREFIX.replace('{N}',p+1);
+    var suf=p<parts.length-1?CONT_SUFFIX:'';
+    result.push(pre+parts[p].join('\n\n')+suf);
+  }
+  return result;
+}
+
+/* ─── Рендер результата ──────────────────────────────────── */
+var _parts=[];
+
+function renderParts(parts,cnt,totalAdd,isSecret){
+  _parts=parts;
+  var container=document.getElementById('parts-container');
+  var html='';
+  var total=parts.length;
+  parts.forEach(function(text,i){
+    var lines=text.split('\n').length;
+    var rows=Math.max(5,Math.min(15,lines+1));
+    html+='<div class="card part-block">'
+      +'<div class="out-head">'
+      +'<span class="out-title">Часть '+(i+1)+' из '+total+'</span>'
+      +'<button class="copy-btn" onclick="copyPart('+i+')">Копировать</button>'
+      +'</div>'
+      +'<div class="badges">'
+      +'<span class="bdg bdg-b">'+text.length+' симв.</span>'
+      +'</div>'
+      +'<div class="ta-wrap">'
+      +'<textarea id="part-'+i+'" rows="'+rows+'" readonly></textarea>'
+      +'</div>'
+      +'</div>';
+  });
+  container.innerHTML=html;
+  // Устанавливаем value после вставки в DOM
+  parts.forEach(function(text,i){
+    document.getElementById('part-'+i).value=text;
+  });
+
+  // Значки статистики
+  var avg=cnt>0?Math.round(totalAdd/cnt):0;
+  document.getElementById('bdgs').innerHTML=
+    '<span class="bdg bdg-b">'+cnt+' позиций</span>'
+    +'<span class="bdg bdg-g">+~'+avg.toLocaleString('ru')+' ₽</span>'
+    +'<span class="bdg bdg-o">'+total+(total===1?' часть':total<5?' части':' частей')+'</span>'
+    +(isSecret?'<span class="bdg bdg-p">Для парней</span>':'');
+}
+
+function copyPart(i){
+  var el=document.getElementById('part-'+i);
+  if(!el)return;
+  try{navigator.clipboard.writeText(el.value);}catch(e){el.select();try{document.execCommand('copy');}catch(e2){}}
+  showToast('✓ Скопировано ('+(i+1)+'-я часть)');
+}
+
+/* ─── Конвертация ────────────────────────────────────────── */
 function doConvert(secret){
   var text=document.getElementById('inp').value.trim();
   if(!text){showToast('⚠ Вставьте прайс');return;}
@@ -465,18 +585,23 @@ function doConvert(secret){
     out.push(line);
   });
   while(out.length>0&&out[out.length-1].trim()==='')out.pop();
+
+  // Шапка и подвал из настроек
+  var headerTpl=document.getElementById('header-ta').value.trim();
+  var header=headerTpl?headerTpl.replace(/\{DATE\}/g,getDateStr()):'В наличии🌟 «'+getDateStr()+'»';
   var footer=document.getElementById('footer-ta').value.trim();
-  document.getElementById('out').value='В наличии🌟 «'+getDateStr()+'»\n\n'+out.join('\n')+(footer?'\n\n'+footer:'');
+
+  var body=out.join('\n');
+  var fullText=header+'\n\n'+body+(footer?'\n\n'+footer:'');
+
+  // Разбиваем на части
+  var parts=splitIntoParts(fullText);
+
   document.getElementById('out-sec').style.display='block';
-  var avg=cnt>0?Math.round(totalAdd/cnt):0;
-  document.getElementById('bdgs').innerHTML='<span class="bdg bdg-b">'+cnt+' позиций</span><span class="bdg bdg-g">+~'+avg.toLocaleString('ru')+' ₽</span>'+(secret?'<span class="bdg bdg-p">Для парней</span>':'');
-  showToast('✓ Готово — '+cnt+' позиций');
+  renderParts(parts,cnt,totalAdd,secret);
+  showToast('✓ Готово — '+cnt+' позиций'+(parts.length>1?', '+parts.length+' части':''));
 }
-function doCopy(){
-  var t=document.getElementById('out');t.select();
-  try{navigator.clipboard.writeText(t.value);}catch(e){try{document.execCommand('copy');}catch(e2){}}
-  showToast('✓ Скопировано');
-}
+
 function showToast(msg){
   var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
   setTimeout(function(){t.classList.remove('show');},2000);
