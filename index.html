@@ -475,44 +475,35 @@ var CONT_SUFFIX='\n\n⬇️ Продолжение...';
 var PAGE_PREFIX='\n\n📄 Страница {N} ⬇️\n\n';
 
 function splitIntoParts(fullText){
-  var rawBlocks=fullText.split(/\n{2,}/);
-  var blocks=[];
-  for(var i=0;i<rawBlocks.length;i++){
-    if(rawBlocks[i].trim())blocks.push(rawBlocks[i]);
+  var lines=fullText.split('\n');
+  var parts=[];
+  var curLines=[];
+  var curLen=0;
+
+  function pagePrefix(n){
+    return n<=1?'':PAGE_PREFIX.replace('{N}',n);
   }
-  if(!blocks.length)return[fullText];
 
-  var parts=[];   // массив частей-строк (уже собранных)
-  var curBlocks=[];
-  var curLen=0;   // длина текущей части: prefix + блоки + sep — без CONT (добавляем при проверке)
+  for(var i=0;i<lines.length;i++){
+    var line=lines[i];
+    var isLast=(i===lines.length-1);
+    var sep=curLines.length>0?'\n':'';
+    var tentative=curLen+sep.length+line.length+(isLast?0:CONT_SUFFIX.length);
 
-  for(var b=0;b<blocks.length;b++){
-    var blk=blocks[b];
-    var isLast=(b===blocks.length-1);
-    var sep=curBlocks.length>0?'\n\n':'';
-    var pageNum=parts.length+1;
-    var prefix=pageNum===1?'':PAGE_PREFIX.replace('{N}',pageNum);
-    // При старте страницы prefix уже учтён в curLen (см. ниже), здесь используем только для первого блока
-    var tentative=curLen+sep.length+blk.length+(isLast?0:CONT_SUFFIX.length);
-
-    if(curBlocks.length>0&&tentative>PAGE_LIMIT){
-      // Сохраняем часть со суффиксом
-      var pre=parts.length===0?'':PAGE_PREFIX.replace('{N}',parts.length+1);
-      parts.push(pre+curBlocks.join('\n\n')+CONT_SUFFIX);
-      // Начало новой страницы: prefix следующей части добавится при финальной сборке
-      var nextPageNum=parts.length+1;
-      var nextPrefix=PAGE_PREFIX.replace('{N}',nextPageNum);
-      curBlocks=[blk];
-      curLen=nextPrefix.length+blk.length; // включаем prefix в счётчик
+    if(curLines.length>0&&tentative>PAGE_LIMIT){
+      var pre=pagePrefix(parts.length+1);
+      parts.push(pre+curLines.join('\n')+CONT_SUFFIX);
+      var np=pagePrefix(parts.length+1);
+      curLines=[line];
+      curLen=np.length+line.length;
     }else{
-      curBlocks.push(blk);
-      curLen+=sep.length+blk.length;
-      // Для первого блока первой страницы prefix='' (длина 0) — уже учтено
+      curLines.push(line);
+      curLen+=sep.length+line.length;
     }
   }
-  if(curBlocks.length>0){
-    var pre=parts.length===0?'':PAGE_PREFIX.replace('{N}',parts.length+1);
-    parts.push(pre+curBlocks.join('\n\n'));
+  if(curLines.length>0){
+    var pre=pagePrefix(parts.length+1);
+    parts.push(pre+curLines.join('\n'));
   }
   return parts;
 }
