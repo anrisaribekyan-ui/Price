@@ -229,38 +229,18 @@ body.dark .clear-btn{background:rgba(255,255,255,0.12);color:#98989e;}
 
   <!-- TAB 2: Для парней -->
   <div class="page" id="pg2">
-    <div class="sec">
-      <div class="sec-note">
-        <p>Конвертируется по обычным наценкам + скрытая надбавка. Клиент видит только итоговую цену.</p>
-      </div>
-    </div>
-    <div class="sec" style="margin-top:12px;">
-      <div class="lbl">Скрытая надбавка</div>
-      <div class="card">
-        <div class="row">
-          <div class="rtext"><div class="rtitle">Скрытый процент</div><div class="rsub">% сверх обычной наценки</div></div>
-          <input class="num-in s-pct-in" id="s-pct" type="number" value="0" onchange="updEx()">
-          <span style="font-size:15px;color:#6e6e73;">%</span>
-        </div>
-        <div class="row">
-          <div class="rtext"><div class="rtitle">Фиксированная сумма</div><div class="rsub">К каждой позиции</div></div>
-          <input class="num-in s-flat-in" id="s-flat" type="number" value="0" onchange="updEx()">
-          <span style="font-size:15px;color:#6e6e73;">₽</span>
-        </div>
-      </div>
+    <div class="sec" style="padding-top:12px;">
+      <p style="font-size:12px;color:#aeaeb2;padding:0 4px;">Шапка и подвал из настроек не добавляются — текст остаётся как есть.</p>
     </div>
     <div class="sec">
-      <div class="lbl">Пример (50 000 ₽ от поставщика)</div>
-      <div class="card">
-        <div class="ex-box">
-          <div class="ex-row">Стандартная наценка: <span class="ex-val" id="ex-std">—</span></div>
-          <div class="ex-row" style="color:#af52de;">Скрытая надбавка: <span id="ex-sec" style="font-weight:600;">—</span></div>
-          <div class="ex-total">Итого клиенту: <span id="ex-tot">—</span></div>
-        </div>
-      </div>
+      <div class="lbl">Наценки для парней</div>
+      <div class="card" id="g-tiers-card"></div>
+      <button class="add-tier-btn" onclick="addTierG()">+ Добавить диапазон</button>
     </div>
-    <div class="sec">
-      <button class="btn btn-purple" onclick="saveAll()">Сохранить</button>
+    <div class="sec" style="padding-bottom:24px;">
+      <div class="dirty-bar" id="dirty-bar-2">⚠ Есть несохранённые изменения</div>
+      <button class="btn btn-purple" onclick="saveAll()">Сохранить настройки</button>
+      <button class="btn btn-danger" onclick="resetDefaults()">Сбросить к умолчаниям</button>
     </div>
   </div>
 
@@ -310,7 +290,12 @@ var DEFAULT_TIERS=[
   {min:80000,max:99999,v:4500},
   {min:100000,max:9999999,v:5500}
 ];
+var DEFAULT_TIERS_G=[
+  {min:0,max:49999,v:3500},
+  {min:50000,max:9999999,v:5000}
+];
 var tiers=DEFAULT_TIERS.map(function(t){return{min:t.min,max:t.max,v:t.v};});
+var tiersG=DEFAULT_TIERS_G.map(function(t){return{min:t.min,max:t.max,v:t.v};});
 var step=500;
 
 var STORAGE_KEY='mob_v1';
@@ -319,10 +304,12 @@ var DEFAULT_FOOTER='*Вся техника привезённая из друг�
 
 function markDirty(){
   document.getElementById('dirty-bar').style.display='block';
+  document.getElementById('dirty-bar-2').style.display='block';
   document.getElementById('dirty-bar-3').style.display='block';
 }
 function clearDirty(){
   document.getElementById('dirty-bar').style.display='none';
+  document.getElementById('dirty-bar-2').style.display='none';
   document.getElementById('dirty-bar-3').style.display='none';
 }
 
@@ -341,23 +328,30 @@ function getTiersFromDOM(){
 function saveAll(){
   var domTiers=getTiersFromDOM();
   for(var i=0;i<domTiers.length;i++){
-    if(domTiers[i].min>=domTiers[i].max){showToast('⚠ Диапазон '+(i+1)+': начало ≥ конца');return;}
+    if(domTiers[i].min>=domTiers[i].max){showToast('⚠ Наценки: диапазон '+(i+1)+': начало ≥ конца');return;}
   }
   var sorted=domTiers.slice().sort(function(a,b){return a.min-b.min;});
   for(var j=1;j<sorted.length;j++){
-    if(sorted[j].min<=sorted[j-1].max){showToast('⚠ Диапазоны пересекаются');return;}
+    if(sorted[j].min<=sorted[j-1].max){showToast('⚠ Наценки: диапазоны пересекаются');return;}
   }
   tiers=sorted;
-  var s={step:step,round:document.getElementById('tog-round').checked,tiers:tiers};
-  s.spct=parseInt(document.getElementById('s-pct').value,10)||0;
-  s.sflat=parseInt(document.getElementById('s-flat').value,10)||0;
+  var domTiersG=getTiersGFromDOM();
+  for(var i=0;i<domTiersG.length;i++){
+    if(domTiersG[i].min>=domTiersG[i].max){showToast('⚠ Парни: диапазон '+(i+1)+': начало ≥ конца');return;}
+  }
+  var sortedG=domTiersG.slice().sort(function(a,b){return a.min-b.min;});
+  for(var j=1;j<sortedG.length;j++){
+    if(sortedG[j].min<=sortedG[j-1].max){showToast('⚠ Парни: диапазоны пересекаются');return;}
+  }
+  tiersG=sortedG;
+  var s={step:step,round:document.getElementById('tog-round').checked,tiers:tiers,tiersG:tiersG};
   s.header=document.getElementById('header-ta').value;
   s.footer=document.getElementById('footer-ta').value;
   try{localStorage.setItem(STORAGE_KEY,JSON.stringify(s));}catch(e){showToast('⚠ Не удалось сохранить');return;}
   buildTiers();
+  buildTiersG();
   clearDirty();
   showToast('✓ Настройки сохранены');
-  updEx();
 }
 
 function loadAll(){
@@ -368,11 +362,14 @@ function loadAll(){
   }else{
     tiers=DEFAULT_TIERS.map(function(t){return{min:t.min,max:t.max,v:t.v};});
   }
+  if(s.tiersG&&Array.isArray(s.tiersG)&&s.tiersG.length>0){
+    tiersG=s.tiersG;
+  }else{
+    tiersG=DEFAULT_TIERS_G.map(function(t){return{min:t.min,max:t.max,v:t.v};});
+  }
   step=Math.max(100,Math.min(5000,parseInt(s.step,10)||500));
   document.getElementById('step-in').value=step;
   document.getElementById('tog-round').checked=s.round!==false;
-  document.getElementById('s-pct').value=s.spct||0;
-  document.getElementById('s-flat').value=s.sflat||0;
   document.getElementById('header-ta').value=s.header!==undefined?s.header:DEFAULT_HEADER;
   document.getElementById('footer-ta').value=s.footer!==undefined?s.footer:DEFAULT_FOOTER;
 }
@@ -380,14 +377,15 @@ function loadAll(){
 function resetDefaults(){
   if(!confirm('Сбросить все настройки к значениям по умолчанию?'))return;
   tiers=DEFAULT_TIERS.map(function(t){return{min:t.min,max:t.max,v:t.v};});
+  tiersG=DEFAULT_TIERS_G.map(function(t){return{min:t.min,max:t.max,v:t.v};});
   step=500;
   document.getElementById('step-in').value=step;
   document.getElementById('tog-round').checked=true;
   document.getElementById('header-ta').value=DEFAULT_HEADER;
   document.getElementById('footer-ta').value=DEFAULT_FOOTER;
   buildTiers();
+  buildTiersG();
   markDirty();
-  updEx();
   showToast('↺ Значения сброшены');
 }
 
@@ -462,6 +460,80 @@ function removeTier(i){
   markDirty();
   updEx();
 }
+/* ─── Наценки для парней ─────────────────────────────────── */
+function getTiersGFromDOM(){
+  var result=[];
+  for(var i=0;i<tiersG.length;i++){
+    var minEl=document.getElementById('g-tier-min-'+i);
+    var maxEl=document.getElementById('g-tier-max-'+i);
+    var vEl=document.getElementById('g-tier-v-'+i);
+    if(!minEl)break;
+    result.push({min:parseInt(minEl.value,10)||0,max:parseInt(maxEl.value,10)||0,v:Math.max(0,parseInt(vEl.value,10)||0)});
+  }
+  return result;
+}
+function buildTiersG(){
+  var c=document.getElementById('g-tiers-card');
+  var colors=['#af52de','#007aff','#34c759','#ff9500','#ff3b30','#ff6b35'];
+  var html='';
+  tiersG.forEach(function(t,i){
+    var color=colors[i%colors.length];
+    html+='<div class="tier-item">'
+      +'<div class="tier-head">'
+      +'<div style="width:26px;height:26px;border-radius:7px;background:'+color+'22;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:700;color:'+color+'">'+(i+1)+'</div>'
+      +'<input class="range-in" id="g-tier-min-'+i+'" type="number" min="0" value="'+t.min+'" oninput="markDirty()" placeholder="от">'
+      +'<span style="font-size:13px;color:#6e6e73;flex-shrink:0;padding:0 2px;">—</span>'
+      +'<input class="range-in" id="g-tier-max-'+i+'" type="number" min="0" value="'+t.max+'" oninput="markDirty()" placeholder="до">'
+      +'<span style="font-size:12px;color:#6e6e73;flex-shrink:0;">₽</span>'
+      +'<button class="del-btn" onclick="removeTierG('+i+')" aria-label="Удалить">✕</button>'
+      +'</div>'
+      +'<div class="tier-markup-row">'
+      +'<span class="markup-lbl">наценка</span>'
+      +'<button class="sbtn" onclick="adjTierG('+i+',-1)">−</button>'
+      +'<input class="num-in" id="g-tier-v-'+i+'" type="number" min="0" value="'+t.v+'" oninput="markDirty()" onchange="markDirty()">'
+      +'<button class="sbtn" onclick="adjTierG('+i+',1)">+</button>'
+      +'</div>'
+      +'</div>';
+  });
+  c.innerHTML=html;
+}
+function getMarkupG(price){
+  for(var i=0;i<tiersG.length;i++){
+    var minEl=document.getElementById('g-tier-min-'+i);
+    var maxEl=document.getElementById('g-tier-max-'+i);
+    var vEl=document.getElementById('g-tier-v-'+i);
+    var min=minEl?parseInt(minEl.value,10):tiersG[i].min;
+    var max=maxEl?parseInt(maxEl.value,10):tiersG[i].max;
+    var v=vEl?Math.max(0,parseInt(vEl.value,10)||0):tiersG[i].v;
+    if(price>=min&&price<=max)return v;
+  }
+  return 0;
+}
+function adjTierG(i,dir){
+  var el=document.getElementById('g-tier-v-'+i);
+  if(!el)return;
+  el.value=Math.max(0,(parseInt(el.value,10)||0)+dir*step);
+  markDirty();
+}
+function addTierG(){
+  tiersG=getTiersGFromDOM();
+  var last=tiersG[tiersG.length-1];
+  var newMin=last?last.max+1:0;
+  var newMax=newMin+9999;
+  tiersG.push({min:newMin,max:newMax,v:last?last.v:3000});
+  buildTiersG();
+  markDirty();
+  var card=document.getElementById('g-tiers-card');
+  if(card.lastElementChild)card.lastElementChild.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function removeTierG(i){
+  if(tiersG.length<=1){showToast('⚠ Нужен хотя бы 1 диапазон');return;}
+  tiersG=getTiersGFromDOM();
+  tiersG.splice(i,1);
+  buildTiersG();
+  markDirty();
+}
+
 function chStep(d){
   step=Math.max(100,Math.min(5000,step+d));
   document.getElementById('step-in').value=step;
@@ -472,16 +544,6 @@ function chStepDirect(val){
   if(isNaN(v))return;
   step=Math.max(100,Math.min(5000,v));
   markDirty();
-}
-function updEx(){
-  var base=50000,std=getMarkup(base);
-  var pct=parseInt(document.getElementById('s-pct').value,10)||0;
-  var flat=parseInt(document.getElementById('s-flat').value,10)||0;
-  var secAmt=Math.round((base+std)*pct/100)+flat;
-  var tot=base+std+secAmt;
-  document.getElementById('ex-std').textContent=std.toLocaleString('ru')+' ₽';
-  document.getElementById('ex-sec').textContent=secAmt.toLocaleString('ru')+' ₽';
-  document.getElementById('ex-tot').textContent=tot.toLocaleString('ru')+' ₽';
 }
 
 var HP=[/мобилочка/i,/\+7\(9[0-9]{2}\)/,/гарантия\s*🇺🇸/i,/косметические дефекты/i,/на возврат брака/i,/принимаем устройства/i];
@@ -607,8 +669,6 @@ function doConvert(secret){
   var text=document.getElementById('inp').value.trim();
   if(!text){showToast('⚠ Вставьте прайс');return;}
   var doRound=document.getElementById('tog-round').checked;
-  var pct=parseInt(document.getElementById('s-pct').value)||0;
-  var flat=parseInt(document.getElementById('s-flat').value)||0;
   var lines=stripHeader(text.split('\n'));
   var out=[],cnt=0,totalAdd=0;
   lines.forEach(function(line){
@@ -616,10 +676,10 @@ function doConvert(secret){
     if(m){
       var raw=parseInt(m[1].replace(/\s+/g,''),10);
       if(!isNaN(raw)&&raw>0){
-        var mu=getMarkup(raw),np=raw+mu,secAmt=0;
-        if(secret){secAmt=Math.round(np*pct/100)+flat;np+=secAmt;}
+        var mu=secret?getMarkupG(raw):getMarkup(raw);
+        var np=raw+mu;
         if(doRound)np=Math.round(np/100)*100;
-        totalAdd+=mu+secAmt;
+        totalAdd+=mu;
         out.push(line.replace(/-\s*(\d[\d\s]*)(\s*)$/,'-'+np.toLocaleString('ru')+'$2'));
         cnt++;return;
       }
@@ -628,13 +688,17 @@ function doConvert(secret){
   });
   while(out.length>0&&out[out.length-1].trim()==='')out.pop();
 
-  // Шапка и подвал из настроек
-  var headerTpl=document.getElementById('header-ta').value.trim();
-  var header=headerTpl?headerTpl.replace(/\{DATE\}/g,getDateStr()):'В наличии🌟 «'+getDateStr()+'»';
-  var footer=document.getElementById('footer-ta').value.trim();
-
-  var body=out.join('\n');
-  var fullText=header+'\n\n'+body+(footer?'\n\n'+footer:'');
+  var fullText;
+  if(secret){
+    // Для парней: только тело, без шапки и подвала
+    fullText=out.join('\n');
+  }else{
+    var headerTpl=document.getElementById('header-ta').value.trim();
+    var header=headerTpl?headerTpl.replace(/\{DATE\}/g,getDateStr()):'В наличии🌟 «'+getDateStr()+'»';
+    var footer=document.getElementById('footer-ta').value.trim();
+    var body=out.join('\n');
+    fullText=header+'\n\n'+body+(footer?'\n\n'+footer:'');
+  }
 
   // Разбиваем на части
   var parts=splitIntoParts(fullText);
@@ -682,7 +746,7 @@ function initTheme(){
 // Инициализация
 loadAll();
 buildTiers();
-updEx();
+buildTiersG();
 initTheme();
 </script>
 
