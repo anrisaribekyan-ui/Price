@@ -477,10 +477,10 @@ function getDateStr(){
 /* ─── Умное разбиение ─────────────────────────────────────── */
 var PAGE_LIMIT=4096;
 var CONT_SUFFIX='\n\n⬇️ Продолжение...';
-var PAGE_PREFIX='📄 Страница {N} ⬇️\n\n';
+// Ведущий \n\n — разделитель между CONT_SUFFIX и следующим PREFIX при join('')
+var PAGE_PREFIX='\n\n📄 Страница {N} ⬇️\n\n';
 
 function splitIntoParts(fullText){
-  // Разбиваем на блоки по двойному переносу строки (бренд-блоки)
   var rawBlocks=fullText.split(/\n{2,}/);
   var blocks=[];
   for(var i=0;i<rawBlocks.length;i++){
@@ -488,44 +488,46 @@ function splitIntoParts(fullText){
   }
   if(!blocks.length)return[fullText];
 
-  var parts=[];        // массив частей, каждая часть — массив блоков
+  var parts=[];   // массив частей-строк (уже собранных)
   var curBlocks=[];
-  var curLen=0;
+  var curLen=0;   // длина текущей части: prefix + блоки + sep — без CONT (добавляем при проверке)
 
   for(var b=0;b<blocks.length;b++){
     var blk=blocks[b];
+    var isLast=(b===blocks.length-1);
     var sep=curBlocks.length>0?'\n\n':'';
-    var partIdx=parts.length;             // индекс текущей (формируемой) части
-    var prefix=partIdx===0?'':PAGE_PREFIX.replace('{N}',partIdx+1);
-    // пессимистично считаем суффикс продолжения
-    var tentative=prefix.length+curLen+sep.length+blk.length+CONT_SUFFIX.length;
+    var pageNum=parts.length+1;
+    var prefix=pageNum===1?'':PAGE_PREFIX.replace('{N}',pageNum);
+    // При старте страницы prefix уже учтён в curLen (см. ниже), здесь используем только для первого блока
+    var tentative=curLen+sep.length+blk.length+(isLast?0:CONT_SUFFIX.length);
 
     if(curBlocks.length>0&&tentative>PAGE_LIMIT){
-      // сохраняем текущую часть, начинаем новую
-      parts.push(curBlocks.slice());
+      // Сохраняем часть со суффиксом
+      var pre=parts.length===0?'':PAGE_PREFIX.replace('{N}',parts.length+1);
+      parts.push(pre+curBlocks.join('\n\n')+CONT_SUFFIX);
+      // Начало новой страницы: prefix следующей части добавится при финальной сборке
+      var nextPageNum=parts.length+1;
+      var nextPrefix=PAGE_PREFIX.replace('{N}',nextPageNum);
       curBlocks=[blk];
-      curLen=blk.length;
+      curLen=nextPrefix.length+blk.length; // включаем prefix в счётчик
     }else{
       curBlocks.push(blk);
       curLen+=sep.length+blk.length;
+      // Для первого блока первой страницы prefix='' (длина 0) — уже учтено
     }
   }
-  if(curBlocks.length>0)parts.push(curBlocks);
-
-  // Собираем строки частей
-  var result=[];
-  for(var p=0;p<parts.length;p++){
-    var pre=p===0?'':PAGE_PREFIX.replace('{N}',p+1);
-    var suf=p<parts.length-1?CONT_SUFFIX:'';
-    result.push(pre+parts[p].join('\n\n')+suf);
+  if(curBlocks.length>0){
+    var pre=parts.length===0?'':PAGE_PREFIX.replace('{N}',parts.length+1);
+    parts.push(pre+curBlocks.join('\n\n'));
   }
-  return result;
+  return parts;
 }
 
 /* ─── Рендер результата ──────────────────────────────────── */
 function renderParts(parts,cnt,totalAdd,isSecret){
   var total=parts.length;
-  var fullText=parts.join('\n\n');
+  // join('') — части уже содержат \n\n перед PAGE_PREFIX, лишний разделитель не нужен
+  var fullText=parts.join('');
   document.getElementById('out').value=fullText;
 
   var label=total===1?'Готовый прайс':'Готовый прайс ('+total+' части)';
