@@ -518,13 +518,33 @@ function splitIntoParts(fullText){
 }
 
 /* ─── Рендер результата ──────────────────────────────────── */
+var _parts=[];
+
+function buildPaddedText(){
+  var total=_parts.length;
+  return _parts.map(function(p,i){
+    var t=p.replace(/^\n+/,'');
+    if(i<total-1){
+      // Pad to exactly 4096 so Telegram auto-splits at block boundaries
+      var pad=4096-t.length;
+      if(pad>0)t+='\u0020'.repeat(pad);
+    }
+    return t;
+  }).join('');
+}
+
 function renderParts(parts,cnt,totalAdd,isSecret){
   var total=parts.length;
+  _parts=parts;
   var container=document.getElementById('parts-container');
   var html='';
+  if(total>1){
+    html+='<button class="btn btn-blue" style="margin-bottom:12px;" onclick="copyAll()">📋 Скопировать все части разом</button>';
+  }
   for(var i=0;i<total;i++){
     var label=total===1?'Готовый прайс':'Часть '+(i+1)+' из '+total;
-    var rows=Math.min(22,Math.max(6,(parts[i].replace(/^\n+/,'').match(/\n/g)||[]).length+2));
+    var cleanText=parts[i].replace(/^\n+/,'');
+    var rows=Math.min(22,Math.max(6,(cleanText.match(/\n/g)||[]).length+2));
     html+='<div class="card" style="margin-bottom:12px;">'
       +'<div class="out-head">'
       +'<span class="out-title">'+label+'</span>'
@@ -549,6 +569,18 @@ function copyPart(i){
   var el=document.getElementById('part-'+i);
   try{navigator.clipboard.writeText(el.value);}catch(e){el.select();try{document.execCommand('copy');}catch(e2){}}
   showToast('✓ Скопировано');
+}
+
+function copyAll(){
+  var text=buildPaddedText();
+  try{navigator.clipboard.writeText(text);}catch(e){
+    var ta=document.createElement('textarea');
+    ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy');}catch(e2){}
+    document.body.removeChild(ta);
+  }
+  showToast('✓ Все части скопированы');
 }
 
 /* ─── Конвертация ────────────────────────────────────────── */
