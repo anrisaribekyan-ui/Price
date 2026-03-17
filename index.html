@@ -162,8 +162,16 @@ textarea::placeholder{color:#48484a;}
       <button class="btn btn-purple" onclick="doConvert(true)">✦ Для парней</button>
     </div>
     <div class="sec" id="out-sec" style="display:none;margin-top:0;">
-      <div class="badges" id="bdgs" style="padding-top:16px;padding-left:4px;"></div>
-      <div id="parts-container"></div>
+      <div class="card" style="margin-top:16px;">
+        <div class="out-head">
+          <span class="out-title" id="out-title">Готовый прайс</span>
+          <button class="copy-btn" onclick="doCopyAll()">Копировать всё</button>
+        </div>
+        <div class="badges" id="bdgs"></div>
+        <div class="ta-wrap">
+          <textarea id="out" rows="14" readonly></textarea>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -515,49 +523,26 @@ function splitIntoParts(fullText){
 }
 
 /* ─── Рендер результата ──────────────────────────────────── */
-var _parts=[];
-
 function renderParts(parts,cnt,totalAdd,isSecret){
-  _parts=parts;
-  var container=document.getElementById('parts-container');
-  var html='';
   var total=parts.length;
-  parts.forEach(function(text,i){
-    var lines=text.split('\n').length;
-    var rows=Math.max(5,Math.min(15,lines+1));
-    html+='<div class="card part-block">'
-      +'<div class="out-head">'
-      +'<span class="out-title">Часть '+(i+1)+' из '+total+'</span>'
-      +'<button class="copy-btn" onclick="copyPart('+i+')">Копировать</button>'
-      +'</div>'
-      +'<div class="badges">'
-      +'<span class="bdg bdg-b">'+text.length+' симв.</span>'
-      +'</div>'
-      +'<div class="ta-wrap">'
-      +'<textarea id="part-'+i+'" rows="'+rows+'" readonly></textarea>'
-      +'</div>'
-      +'</div>';
-  });
-  container.innerHTML=html;
-  // Устанавливаем value после вставки в DOM
-  parts.forEach(function(text,i){
-    document.getElementById('part-'+i).value=text;
-  });
+  var fullText=parts.join('\n\n');
+  document.getElementById('out').value=fullText;
 
-  // Значки статистики
+  var label=total===1?'Готовый прайс':'Готовый прайс ('+total+' части)';
+  document.getElementById('out-title').textContent=label;
+
   var avg=cnt>0?Math.round(totalAdd/cnt):0;
   document.getElementById('bdgs').innerHTML=
     '<span class="bdg bdg-b">'+cnt+' позиций</span>'
     +'<span class="bdg bdg-g">+~'+avg.toLocaleString('ru')+' ₽</span>'
-    +'<span class="bdg bdg-o">'+total+(total===1?' часть':total<5?' части':' частей')+'</span>'
+    +(total>1?'<span class="bdg bdg-o">'+total+' части по 4096</span>':'')
     +(isSecret?'<span class="bdg bdg-p">Для парней</span>':'');
 }
 
-function copyPart(i){
-  var el=document.getElementById('part-'+i);
-  if(!el)return;
+function doCopyAll(){
+  var el=document.getElementById('out');
   try{navigator.clipboard.writeText(el.value);}catch(e){el.select();try{document.execCommand('copy');}catch(e2){}}
-  showToast('✓ Скопировано ('+(i+1)+'-я часть)');
+  showToast('✓ Скопировано');
 }
 
 /* ─── Конвертация ────────────────────────────────────────── */
