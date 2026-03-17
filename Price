@@ -67,6 +67,17 @@ textarea::placeholder{color:#c7c7cc;}
 .step-ctrl{display:flex;align-items:center;gap:12px;}
 .step-val{flex:1;text-align:center;font-size:20px;font-weight:700;color:#007aff;}
 .sublabel{font-size:12px;color:#aeaeb2;text-align:center;margin-top:3px;}
+.tier-item{border-bottom:0.5px solid rgba(0,0,0,0.08);}
+.tier-item:last-child{border-bottom:none;}
+.tier-head{display:flex;align-items:center;padding:12px 16px 6px;gap:6px;}
+.tier-markup-row{display:flex;align-items:center;padding:3px 16px 12px;gap:8px;padding-left:50px;}
+.range-in{width:70px;font-size:13px;font-weight:600;color:#1c1c1e;background:rgba(0,0,0,0.05);border:1px solid rgba(0,0,0,0.12);border-radius:7px;padding:5px 6px;outline:none;text-align:center;}
+.range-in:focus{border-color:#007aff;box-shadow:0 0 0 2px rgba(0,122,255,0.15);}
+.del-btn{min-width:28px;height:28px;border-radius:50%;background:rgba(255,59,48,0.1);border:none;color:#ff3b30;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:auto;}
+.del-btn:active{transform:scale(.88);}
+.markup-lbl{font-size:12px;color:#6e6e73;flex:1;}
+.add-tier-btn{width:100%;margin-top:8px;padding:12px;border:1.5px dashed rgba(0,122,255,0.4);border-radius:12px;background:rgba(0,122,255,0.05);color:#007aff;font-size:15px;font-weight:600;cursor:pointer;transition:opacity .15s;}
+.add-tier-btn:active{opacity:.7;}
 
 @media(prefers-color-scheme:dark){
 body{background:#1c1c1e;color:#fff;}
@@ -105,6 +116,13 @@ textarea::placeholder{color:#48484a;}
 .sbtn{background:rgba(10,132,255,0.18);color:#0a84ff;}
 .btn-blue{background:#0a84ff;}
 .s-pct-in,.s-flat-in{color:#bf5af2 !important;background:rgba(191,90,242,0.14) !important;border-color:rgba(191,90,242,0.35) !important;}
+.range-in{color:#fff !important;background:rgba(255,255,255,0.08) !important;border-color:rgba(255,255,255,0.15) !important;}
+.range-in:focus{border-color:#0a84ff !important;box-shadow:0 0 0 2px rgba(10,132,255,0.2) !important;}
+.del-btn{background:rgba(255,69,58,0.18) !important;color:#ff453a !important;}
+.markup-lbl{color:#636366;}
+.add-tier-btn{border-color:rgba(10,132,255,0.4) !important;background:rgba(10,132,255,0.08) !important;color:#0a84ff !important;}
+.btn-danger{background:#ff453a;}
+.dirty-bar{color:#ffa040;}
 }
 </style>
 
@@ -152,6 +170,7 @@ textarea::placeholder{color:#48484a;}
     <div class="sec">
       <div class="lbl">Наценки по диапазону</div>
       <div class="card" id="tiers-card"></div>
+      <button class="add-tier-btn" onclick="addTier()">+ Добавить диапазон</button>
     </div>
     <div class="sec">
       <div class="lbl">Шаг кнопок ±</div>
@@ -233,14 +252,15 @@ textarea::placeholder{color:#48484a;}
 <div class="toast" id="toast">✓ Готово</div>
 
 <script>
-var tiers=[
-  {label:'0 — 4 990 ₽',min:0,max:4990,key:'m1',def:1500},
-  {label:'5 000 — 18 999 ₽',min:5000,max:18999,key:'m2',def:2500},
-  {label:'19 000 — 38 999 ₽',min:19000,max:38999,key:'m3',def:3000},
-  {label:'39 000 — 79 999 ₽',min:39000,max:79999,key:'m4',def:4000},
-  {label:'80 000 — 99 999 ₽',min:80000,max:99999,key:'m5',def:4500},
-  {label:'100 000 + ₽',min:100000,max:1e9,key:'m6',def:5500}
+var DEFAULT_TIERS=[
+  {min:0,max:4990,v:1500},
+  {min:5000,max:18999,v:2500},
+  {min:19000,max:38999,v:3000},
+  {min:39000,max:79999,v:4000},
+  {min:80000,max:99999,v:4500},
+  {min:100000,max:9999999,v:5500}
 ];
+var tiers=DEFAULT_TIERS.map(function(t){return{min:t.min,max:t.max,v:t.v};});
 var step=500;
 
 var STORAGE_KEY='mob_v1';
@@ -253,14 +273,34 @@ function clearDirty(){
   document.getElementById('dirty-bar').style.display='none';
 }
 
-// Сохранение через localStorage (работает в реальном браузере/файле)
+function getTiersFromDOM(){
+  var result=[];
+  for(var i=0;i<tiers.length;i++){
+    var minEl=document.getElementById('tier-min-'+i);
+    var maxEl=document.getElementById('tier-max-'+i);
+    var vEl=document.getElementById('tier-v-'+i);
+    if(!minEl)break;
+    result.push({min:parseInt(minEl.value,10)||0,max:parseInt(maxEl.value,10)||0,v:Math.max(0,parseInt(vEl.value,10)||0)});
+  }
+  return result;
+}
+
 function saveAll(){
-  var s={step:step,round:document.getElementById('tog-round').checked};
-  tiers.forEach(function(t){s[t.key]=getV(t.key);});
+  var domTiers=getTiersFromDOM();
+  for(var i=0;i<domTiers.length;i++){
+    if(domTiers[i].min>=domTiers[i].max){showToast('⚠ Диапазон '+(i+1)+': начало ≥ конца');return;}
+  }
+  var sorted=domTiers.slice().sort(function(a,b){return a.min-b.min;});
+  for(var j=1;j<sorted.length;j++){
+    if(sorted[j].min<=sorted[j-1].max){showToast('⚠ Диапазоны пересекаются');return;}
+  }
+  tiers=sorted;
+  var s={step:step,round:document.getElementById('tog-round').checked,tiers:tiers};
   s.spct=parseInt(document.getElementById('s-pct').value,10)||0;
   s.sflat=parseInt(document.getElementById('s-flat').value,10)||0;
   s.footer=document.getElementById('footer-ta').value;
   try{localStorage.setItem(STORAGE_KEY,JSON.stringify(s));}catch(e){showToast('⚠ Не удалось сохранить');return;}
+  buildTiers();
   clearDirty();
   showToast('✓ Настройки сохранены');
   updEx();
@@ -269,7 +309,11 @@ function saveAll(){
 function loadAll(){
   var s={};
   try{s=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');}catch(e){}
-  tiers.forEach(function(t){t.v=s[t.key]!==undefined?s[t.key]:t.def;});
+  if(s.tiers&&Array.isArray(s.tiers)&&s.tiers.length>0){
+    tiers=s.tiers;
+  }else{
+    tiers=DEFAULT_TIERS.map(function(t){return{min:t.min,max:t.max,v:t.v};});
+  }
   step=Math.max(100,Math.min(5000,parseInt(s.step,10)||500));
   document.getElementById('step-in').value=step;
   document.getElementById('tog-round').checked=s.round!==false;
@@ -279,15 +323,13 @@ function loadAll(){
 }
 
 function resetDefaults(){
-  if(!confirm('Сбросить все наценки к значениям по умолчанию?'))return;
-  tiers.forEach(function(t){
-    var el=document.getElementById('in-'+t.key);
-    if(el)el.value=t.def;
-  });
+  if(!confirm('Сбросить все настройки к значениям по умолчанию?'))return;
+  tiers=DEFAULT_TIERS.map(function(t){return{min:t.min,max:t.max,v:t.v};});
   step=500;
   document.getElementById('step-in').value=step;
   document.getElementById('tog-round').checked=true;
   document.getElementById('footer-ta').value=DEFAULT_FOOTER;
+  buildTiers();
   markDirty();
   updEx();
   showToast('↺ Значения сброшены');
@@ -305,31 +347,62 @@ function buildTiers(){
   var colors=['#ff9500','#34c759','#007aff','#ff3b30','#af52de','#ff6b35'];
   var html='';
   tiers.forEach(function(t,i){
-    html+='<div class="row">'
-      +'<div style="width:32px;height:32px;border-radius:8px;background:'+colors[i]+'22;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:700;color:'+colors[i]+'">'+(i+1)+'</div>'
-      +'<div class="rtext"><div class="rtitle" style="font-size:15px;">'+t.label+'</div></div>'
-      +'<button class="sbtn" onclick="adjTier(\''+t.key+'\',-1)">−</button>'
-      +'<input class="num-in" id="in-'+t.key+'" type="number" min="0" value="'+t.v+'" oninput="markDirty();updEx()" onchange="markDirty();updEx()">'
-      +'<button class="sbtn" onclick="adjTier(\''+t.key+'\',1)">+</button>'
+    var color=colors[i%colors.length];
+    html+='<div class="tier-item">'
+      +'<div class="tier-head">'
+      +'<div style="width:26px;height:26px;border-radius:7px;background:'+color+'22;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:700;color:'+color+'">'+(i+1)+'</div>'
+      +'<input class="range-in" id="tier-min-'+i+'" type="number" min="0" value="'+t.min+'" oninput="markDirty()" placeholder="от">'
+      +'<span style="font-size:13px;color:#6e6e73;flex-shrink:0;padding:0 2px;">—</span>'
+      +'<input class="range-in" id="tier-max-'+i+'" type="number" min="0" value="'+t.max+'" oninput="markDirty()" placeholder="до">'
+      +'<span style="font-size:12px;color:#6e6e73;flex-shrink:0;">₽</span>'
+      +'<button class="del-btn" onclick="removeTier('+i+')" aria-label="Удалить">✕</button>'
+      +'</div>'
+      +'<div class="tier-markup-row">'
+      +'<span class="markup-lbl">наценка</span>'
+      +'<button class="sbtn" onclick="adjTier('+i+',-1)">−</button>'
+      +'<input class="num-in" id="tier-v-'+i+'" type="number" min="0" value="'+t.v+'" oninput="markDirty();updEx()" onchange="markDirty();updEx()">'
+      +'<button class="sbtn" onclick="adjTier('+i+',1)">+</button>'
+      +'</div>'
       +'</div>';
   });
   c.innerHTML=html;
 }
 
-function getV(key){
-  var el=document.getElementById('in-'+key);
-  if(el)return parseInt(el.value,10)||0;
-  var t=tiers.find(function(x){return x.key===key;});
-  return t?t.v:0;
-}
 function getMarkup(price){
-  var t=tiers.find(function(x){return price>=x.min&&price<=x.max;});
-  return t?getV(t.key):0;
+  for(var i=0;i<tiers.length;i++){
+    var minEl=document.getElementById('tier-min-'+i);
+    var maxEl=document.getElementById('tier-max-'+i);
+    var vEl=document.getElementById('tier-v-'+i);
+    var min=minEl?parseInt(minEl.value,10):tiers[i].min;
+    var max=maxEl?parseInt(maxEl.value,10):tiers[i].max;
+    var v=vEl?Math.max(0,parseInt(vEl.value,10)||0):tiers[i].v;
+    if(price>=min&&price<=max)return v;
+  }
+  return 0;
 }
-function adjTier(key,dir){
-  var el=document.getElementById('in-'+key);
+function adjTier(i,dir){
+  var el=document.getElementById('tier-v-'+i);
   if(!el)return;
   el.value=Math.max(0,(parseInt(el.value,10)||0)+dir*step);
+  markDirty();
+  updEx();
+}
+function addTier(){
+  tiers=getTiersFromDOM();
+  var last=tiers[tiers.length-1];
+  var newMin=last?last.max+1:0;
+  var newMax=newMin+9999;
+  tiers.push({min:newMin,max:newMax,v:last?last.v:3000});
+  buildTiers();
+  markDirty();
+  var card=document.getElementById('tiers-card');
+  if(card.lastElementChild)card.lastElementChild.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function removeTier(i){
+  if(tiers.length<=1){showToast('⚠ Нужен хотя бы 1 диапазон');return;}
+  tiers=getTiersFromDOM();
+  tiers.splice(i,1);
+  buildTiers();
   markDirty();
   updEx();
 }
@@ -345,9 +418,9 @@ function chStepDirect(val){
   markDirty();
 }
 function updEx(){
-  var base=50000,std=getV('m4');
-  var pct=parseInt(document.getElementById('s-pct').value)||0;
-  var flat=parseInt(document.getElementById('s-flat').value)||0;
+  var base=50000,std=getMarkup(base);
+  var pct=parseInt(document.getElementById('s-pct').value,10)||0;
+  var flat=parseInt(document.getElementById('s-flat').value,10)||0;
   var secAmt=Math.round((base+std)*pct/100)+flat;
   var tot=base+std+secAmt;
   document.getElementById('ex-std').textContent=std.toLocaleString('ru')+' ₽';
